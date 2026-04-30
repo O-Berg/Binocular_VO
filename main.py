@@ -365,7 +365,7 @@ class VOPipeline:
 
     # ── event loop ────────────────────────────────────────────────────────────
 
-    def run(self, auto_pipeline: bool = False, pointcloud_recorder=None):
+    def run(self, auto_pipeline: bool = False, pointcloud_recorder=None, stop_when=None):
         cv2.namedWindow("VO Depth Analysis", cv2.WINDOW_NORMAL)
         video_writer  = None
         frame_idx     = 0
@@ -444,6 +444,9 @@ class VOPipeline:
                 frame_idx = min(self.num_frames - 1, frame_idx + 1)
                 continue
 
+            if stop_when is not None and stop_when():
+                break
+
             if not paused:
                 frame_idx += 1
                 if frame_idx >= self.num_frames:
@@ -487,15 +490,15 @@ class GifRecorder:
 
     def save(self):
         if not self._frames:
-            print('[GIF] no frames captured — nothing written')
+            print('[GIF] no frames captured - nothing written')
             return
         try:
             import imageio
         except ImportError:
-            print('[GIF] imageio not installed — run: pip install imageio[ffmpeg]')
+            print('[GIF] imageio not installed - run: pip install imageio[ffmpeg]')
             return
         duration = 1.0 / self.fps
-        print(f'[GIF] writing {len(self._frames)} frames → {self.output_path}')
+        print(f'[GIF] writing {len(self._frames)} frames -> {self.output_path}')
         imageio.mimsave(self.output_path, self._frames, duration=duration, loop=0)
         print(f'[GIF] saved {self.output_path}')
 
@@ -548,7 +551,12 @@ if __name__ == '__main__':
     parser.add_argument('--gif-frames', type=int, default=config.GIF_FRAMES)
     parser.add_argument('--gif-fps', type=float, default=config.GIF_FPS)
     parser.add_argument('--gif-scale', type=float, default=config.GIF_SCALE)
+    parser.add_argument('--pointcloud-color', choices=['depth', 'video'], default=None,
+                        help='Point cloud GIF colour mode (default: config.PC_DEPTH_COLOR)')
     args = parser.parse_args()
+
+    if args.pointcloud_color is not None:
+        config.PC_DEPTH_COLOR = (args.pointcloud_color == 'depth')
 
     # CLI flag takes priority; fall back to config bools
     record_depth      = (args.record_gif == 'depth')    or (args.record_gif is None and config.RECORD_GIF_DEPTH)
@@ -561,9 +569,13 @@ if __name__ == '__main__':
         import os
         out_dir = os.path.join(config.GIF_OUTPUT_DIR, f'seq{args.sequence:02d}')
         os.makedirs(out_dir, exist_ok=True)
-        out_path = args.gif_out or os.path.join(out_dir, f'{name}.gif')
+        gif_name = name
+        if name == 'pointcloud':
+            color_mode = 'depth-color' if config.PC_DEPTH_COLOR else 'video-color'
+            gif_name = f'{name}_{color_mode}'
+        out_path = args.gif_out or os.path.join(out_dir, f'{gif_name}.gif')
         r = GifRecorder(out_path, max_frames=args.gif_frames, fps=args.gif_fps, scale=args.gif_scale)
-        print(f'[GIF] recording "{name}" → {out_path}  '
+        print(f'[GIF] recording "{name}" -> {out_path}  '
               f'(max {args.gif_frames} frames @ {args.gif_fps} fps, scale={args.gif_scale})')
         return r
 
@@ -590,8 +602,12 @@ if __name__ == '__main__':
             return frame
         pipeline._build_main_display = _recording_build
 
+    active_recorders = [r for r in (depth_recorder, pipeline_recorder, pointcloud_recorder)
+                        if r is not None]
+
     pipeline.run(auto_pipeline=pipeline_recorder is not None,
-                 pointcloud_recorder=pointcloud_recorder)
+                 pointcloud_recorder=pointcloud_recorder,
+                 stop_when=lambda: active_recorders and all(r.is_full for r in active_recorders))
 
     if depth_recorder is not None:
         depth_recorder.save()

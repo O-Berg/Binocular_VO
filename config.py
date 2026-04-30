@@ -1,5 +1,5 @@
 # ── Dataset ───────────────────────────────────────────────────────────────────
-SEQUENCE_ID = 4   # KITTI sequence to run (0–10 for odometry benchmark)
+SEQUENCE_ID = 3   # KITTI sequence to run (0–10 for odometry benchmark)
 
 # ── Feature extraction ────────────────────────────────────────────────────────
 HARRIS_K           = 0.04
