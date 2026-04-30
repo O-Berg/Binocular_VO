@@ -37,6 +37,22 @@ The point cloud can be rendered in two modes:
 
 `depth` colour makes distance structure easier to read. `video` colour samples the source image patches so the cloud keeps some of the original scene appearance.
 
+## Repository Structure
+
+```text
+Binocular_VO/
+|-- main.py              # application entry point and VO loop
+|-- config.py            # dataset, feature, matching, output, and GPU settings
+|-- dataset.py           # KITTI sequence loading and calibration helpers
+|-- features.py          # Harris features, patch extraction, and NCC backend
+|-- matching.py          # stereo and temporal feature matching
+|-- pose.py              # pose estimation and outlier filtering support
+|-- visualization.py     # depth maps, overlays, and VisPy point-cloud rendering
+|-- recordings/          # tracked GIF showcases for sequences 00-04
+|-- requirements.txt     # Python dependencies
+`-- dataset/sequences/   # local KITTI data, ignored by Git
+```
+
 ## GPU Acceleration
 
 The expensive temporal NCC matrix can run through CuPy when `USE_GPU = True` in `config.py`. On startup the app now reports the actual backend clearly:
