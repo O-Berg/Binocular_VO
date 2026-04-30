@@ -53,9 +53,9 @@ PNP_MIN_INLIERS  = 6
 SAVE_VIDEO        = False
 VIDEO_OUTPUT_PATH = 'output.mp4'
 
-RECORD_GIF_DEPTH      = True   # record main depth+overlay window to depth.gif on exit
-RECORD_GIF_PIPELINE   = True   # record 6-step pipeline window to pipeline.gif on exit
-RECORD_GIF_POINTCLOUD = True   # record 3D point cloud window to pointcloud.gif on exit
+RECORD_GIF_DEPTH      = False  # record main depth+overlay window to depth.gif on exit
+RECORD_GIF_PIPELINE   = False  # record 6-step pipeline window to pipeline.gif on exit
+RECORD_GIF_POINTCLOUD = False  # record 3D point cloud window to pointcloud.gif on exit
 GIF_OUTPUT_DIR      = 'recordings'
 GIF_FRAMES          = 150
 GIF_FPS             = 10.0

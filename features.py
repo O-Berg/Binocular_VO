@@ -6,20 +6,26 @@ import config
 
 os.environ.setdefault('CUDA_PATH', r'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2')
 
-try:
-    import cupy as cp
-    # Trigger a real kernel compile now to verify the toolkit is present.
-    # cupy imports successfully even without the CUDA Toolkit, but crashes
-    # on first kernel use if nvrtc*.dll is missing.
-    _x = cp.array([1.0])
-    cp.linalg.norm(_x)
-    del _x
-    _HAS_GPU = True
-    print('[GPU] cupy OK — NCC will run on GPU')
-except Exception:
-    cp = None
-    _HAS_GPU = False
-    print('[GPU] cupy unavailable or CUDA Toolkit missing — falling back to numpy')
+cp = None
+_HAS_GPU = False
+
+if config.USE_GPU:
+    try:
+        import cupy as cp
+        # Trigger a real kernel compile now to verify the toolkit is present.
+        # cupy imports successfully even without the CUDA Toolkit, but crashes
+        # on first kernel use if nvrtc*.dll is missing.
+        _x = cp.array([1.0])
+        cp.linalg.norm(_x)
+        del _x
+        _HAS_GPU = True
+        print('[GPU] cupy OK - temporal NCC acceleration enabled')
+    except Exception:
+        cp = None
+        _HAS_GPU = False
+        print('[GPU] cupy unavailable or CUDA Toolkit missing - falling back to numpy')
+else:
+    print('[GPU] disabled by config.USE_GPU - using numpy')
 
 _NMS_KERNEL      = cv2.getStructuringElement(cv2.MORPH_RECT,    (config.NMS_KERNEL, config.NMS_KERNEL))
 _SUPPRESS_KERNEL = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (config.SUPPRESS_RADIUS * 2 + 1,
