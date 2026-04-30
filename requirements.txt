@@ -1,0 +1,4 @@
+opencv-python
+numpy
+imageio[ffmpeg]
+cupy-cuda12x

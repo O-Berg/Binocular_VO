@@ -1,0 +1,11 @@
+    features = _peaks_to_features(clean, xs1, ys1)
+
+    # ── Suppress pass-1 neighbourhoods via dilation ──────────────────────────
+    selected_bitmap              = np.zeros(clean.shape, dtype=np.uint8)
+    selected_bitmap[ys1, xs1]   = 1
+    suppress_mask                = cv2.dilate(selected_bitmap, _HULL_PAD_KERNEL).astype(bool)
+    suppressed                   = clean * (~suppress_mask).astype(np.float32)
+    suppressed_vis               = (suppress_mask.astype(np.float32) * 255)
+
+    # ── Pass 2: weak fill-in from suppressed map ─────────────────────────────
+    dilated2   = cv2.dilate(s
