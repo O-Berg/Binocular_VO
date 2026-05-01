@@ -1,6 +1,6 @@
 # Binocular Visual Odometry
 
-Visual odometry from raw KITTI stereo frames to a live 3D point cloud.
+Visual odometry, implemented with Claude Code, from raw KITTI stereo frames to a live 3D point cloud.
 
 The pipeline takes a pair of camera images, extracts stable Harris features, matches them between the left and right views, estimates depth through disparity, tracks motion over time, and accumulates the result into a world-space point cloud.
 
